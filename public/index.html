@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1f3a" />
+  <meta name="description" content="Thermatics solar PV quoting calculator. Configure panel count and battery, see twenty year savings, payback period and finance options." />
+  <title>Thermatics Solar Quoting Calculator</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230f1f3a'/%3E%3Cpath d='M16 14h32v8H16zM16 26h32v8H16zM16 38h32v8H16z' fill='%23f5b301'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="12" fill="#0f1f3a"/>
+          <path d="M16 14h32v8H16zM16 26h32v8H16zM16 38h32v8H16z" fill="#f5b301"/>
+        </svg>
+        <span class="brand-name">Thermatics</span>
+        <span class="brand-tag">Solar quoting calculator</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container app-grid">
+    <!-- LEFT: configurator -->
+    <section class="panel" aria-label="Configuration">
+      <h1 class="h1">Configure your system</h1>
+      <p class="muted">Adjust the system, your tariff, and finance terms. Numbers update instantly.</p>
+
+      <form id="quote-form" class="form" autocomplete="off">
+        <fieldset>
+          <legend class="legend">System package</legend>
+          <div class="select-wrap">
+            <select id="selection" name="selection" required></select>
+          </div>
+          <p class="muted small" id="selection-meta">&nbsp;</p>
+        </fieldset>
+
+        <fieldset>
+          <legend class="legend">Your tariff</legend>
+          <div class="row two">
+            <label class="field">
+              <span class="label">Peak rate <em>(£/kWh)</em></span>
+              <input id="peakRate" name="peakRate" type="number" inputmode="decimal" step="0.001" min="0" value="0.23" />
+            </label>
+            <label class="field">
+              <span class="label">Off-peak rate <em>(£/kWh)</em></span>
+              <input id="offPeakRate" name="offPeakRate" type="number" inputmode="decimal" step="0.001" min="0" value="0.05" />
+            </label>
+          </div>
+          <label class="field">
+            <span class="label">Annual electricity price increase <em>(%)</em></span>
+            <input id="inflationPct" name="inflationPct" type="number" inputmode="decimal" step="0.1" min="0" value="4" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend class="legend">Finance (optional)</legend>
+          <div class="row two">
+            <label class="field">
+              <span class="label">APR <em>(%)</em></span>
+              <input id="aprPct" name="aprPct" type="number" inputmode="decimal" step="0.01" min="0" value="6.3" />
+            </label>
+            <label class="field">
+              <span class="label">Term <em>(years)</em></span>
+              <input id="termYears" name="termYears" type="number" inputmode="numeric" step="1" min="1" max="25" value="5" />
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" id="reset-btn" class="btn btn-ghost">Reset defaults</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- RIGHT: results -->
+    <section class="panel results" aria-label="Quote results">
+      <header class="results-header">
+        <div>
+          <h2 class="h2" id="result-title">Your quote</h2>
+          <p class="muted small" id="result-sub">Enter values on the left to see your numbers.</p>
+        </div>
+        <div class="badge" id="result-badge" hidden>
+          <span class="badge-label">20-year net return</span>
+          <strong class="badge-value" id="badge-net">£0</strong>
+        </div>
+      </header>
+
+      <div class="kpis" id="kpis">
+        <div class="kpi">
+          <span class="kpi-label">System cost</span>
+          <strong class="kpi-value" id="kpi-cost">£0</strong>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Year 1 saving</span>
+          <strong class="kpi-value" id="kpi-year1">£0</strong>
+          <span class="kpi-sub" id="kpi-monthly">£0/mo average</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">20-year saving</span>
+          <strong class="kpi-value" id="kpi-twenty">£0</strong>
+          <span class="kpi-sub" id="kpi-payback">Payback in &mdash;</span>
+        </div>
+      </div>
+
+      <h3 class="h3">Cumulative savings vs system cost</h3>
+      <div class="chart-wrap">
+        <canvas id="chart" width="800" height="320" aria-label="Twenty year cumulative savings chart"></canvas>
+      </div>
+      <ul class="legend-list">
+        <li><span class="dot dot-cumulative"></span>Cumulative savings</li>
+        <li><span class="dot dot-cost"></span>System cost</li>
+        <li><span class="dot dot-payback"></span>Payback point</li>
+      </ul>
+
+      <h3 class="h3">Finance breakdown</h3>
+      <div class="finance">
+        <div class="fin-cell">
+          <span class="fin-label">Monthly payment</span>
+          <strong class="fin-value" id="fin-monthly">£0</strong>
+        </div>
+        <div class="fin-cell">
+          <span class="fin-label">Total payable</span>
+          <strong class="fin-value" id="fin-total">£0</strong>
+        </div>
+        <div class="fin-cell">
+          <span class="fin-label">Total interest</span>
+          <strong class="fin-value" id="fin-interest">£0</strong>
+        </div>
+      </div>
+
+      <details class="year-table-wrap">
+        <summary>Show year-by-year breakdown</summary>
+        <div class="table-scroll">
+          <table class="year-table" id="year-table">
+            <thead>
+              <tr>
+                <th scope="col">Year</th>
+                <th scope="col">Solar</th>
+                <th scope="col">Battery</th>
+                <th scope="col">Annual</th>
+                <th scope="col">Cumulative</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+
+      <p class="muted small disclaimer">
+        Calculations match the audited Thermatics Excel model. The U14/V14 14-panel bug found in the source spreadsheet is fixed in this app. Figures assume 90 percent battery cycling, 0.4 percent panel degradation in year 2 then 0.5 percent per year, 0.2 percent battery capacity loss per year, and the electricity price increase you set above.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted small">Thermatics quoting calculator. Numbers powered by the audited Solar Paybacks model.</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
