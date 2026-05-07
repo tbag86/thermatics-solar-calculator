@@ -23,6 +23,16 @@ npm test             # runs the engine unit tests against the spreadsheet's cach
 
 Open `http://localhost:3027/` in a browser.
 
+The HTML, CSS and JS use relative URLs, so the app also works when reverse-proxied at a sub-path (for example `https://example.com/thermatics/`).
+
+## Live URL
+
+The production deployment runs on the Hetzner VPS and is reverse-proxied through nginx at:
+
+`http://46.225.129.231/thermatics/`
+
+The raw Express port (3027) is blocked by the Hetzner cloud firewall, so use the `/thermatics/` path.
+
 ## API
 
 | Method | Path           | Description                                       |

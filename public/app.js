@@ -31,7 +31,7 @@
     });
 
     try {
-      const r = await fetch('/api/options');
+      const r = await fetch('api/options');
       const data = await r.json();
       optionsCache = data.options || [];
       populateSelect(optionsCache);
@@ -121,7 +121,7 @@
     pendingFetch = ctrl;
 
     try {
-      const r = await fetch('/api/quote', {
+      const r = await fetch('api/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
